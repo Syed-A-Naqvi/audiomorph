@@ -74,6 +74,7 @@ testfile = [signal,sample_rate]
 
 # plotting original audio
 plot_signal(signal,sample_rate, "Original Audio")
+plt.show()
 sf.write("./output/original_audio.wav", testfile[0], testfile[1])
 
 # scaling audio file
@@ -82,9 +83,11 @@ testfile[0] *= scale_factor
 
 # plotting scaled audio
 plot_signal(testfile[0],testfile[1], "Scaled Audio")
+plt.show()
 sf.write("./output/scaled_audio.wav", testfile[0], testfile[1])
 
 # adding noise
 noisy_audio = add_noise(noise_type, testfile, snr=snr)    
 plot_signal(noisy_audio[0], noisy_audio[1], "Noisy Audio Signal")
+plt.show()
 sf.write("./output/noisy_audio.wav", noisy_audio[0], noisy_audio[1])
