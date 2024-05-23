@@ -52,8 +52,8 @@ def add_noise(noise_type, signal, snr=1):
     noisy_audio = noise + digital_signal
     
     #normalizing noisy audio
-    scale_factor = math.sqrt(RAVDESS_P_AVG*signal_len/sum(noise**2))
-    noisy_audio *= scale_factor
+    # scale_factor = math.sqrt(RAVDESS_P_AVG*signal_len/sum(noise**2))
+    # noisy_audio *= scale_factor
     
     return [noisy_audio, sample_rate]
 

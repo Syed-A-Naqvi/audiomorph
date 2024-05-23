@@ -4,6 +4,8 @@ The purpose of this project is to obtain granular control over the amount of noi
 
 # Instructions
 
-- clone repo and run the command ```python3 add_noise.py <audio_file>``` in the terminal
-- replace ```<audio_file>``` with the name of the ravdess audio file to normalize and in which to insert noise
+- clone repo and run the command ```python3 add_noise.py <audio_file>``` in the terminal from the project root directory
+- replace ```<audio_file>``` with the name of the ravdess audio file to modify
+- provide the desired signal to noise ratio in decibals:
+- - normalize and in which to insert noise
 - check the output folder for original audio, scaled(normalized) audio and finally the noisy audio
