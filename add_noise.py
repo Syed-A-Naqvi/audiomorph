@@ -64,17 +64,19 @@ def add_noise(noise_type, signal, snr=1):
         noise = np.array(noise[start:end])
     
     # scaling noise down to RAVDESS overall average power level
-    noise_avgpwr_scale = math.sqrt( (RAVDESS_P_AVG*signal_len) / sum(noise**2))
-    noise *= noise_avgpwr_scale
+    # noise_avgpwr_scale = math.sqrt( (RAVDESS_P_AVG*signal_len) / sum(noise**2))
+    # noise *= noise_avgpwr_scale
     
-    if (snr >= 0):
-        scale_factor = math.sqrt( (10**(-snr/10)) )
-        noise *= scale_factor
-        print(f'snr = {snr}, scale factor = {scale_factor}, scaling noise')
-    else:
-        scale_factor = math.sqrt( (10**(snr/10)) )    
-        digital_signal *= scale_factor
-        print(f'snr = {snr}, scale factor = {scale_factor}, scaling signal')
+    # if (snr >= 0):
+    #     scale_factor = math.sqrt( (10**(-snr/10)) )
+    #     noise *= scale_factor
+    #     print(f'snr = {snr}, scale factor = {scale_factor}, scaling noise')
+    # else:
+    #     scale_factor = math.sqrt( (10**(snr/10)) )    
+    #     digital_signal *= scale_factor
+    #     print(f'snr = {snr}, scale factor = {scale_factor}, scaling signal')
+
+    
     
     print(f"noise power level = {sum(noise**2)/len(noise)}")
     print(f"signal power level = {sum(digital_signal**2)/signal_len}")
@@ -95,8 +97,11 @@ noise_type = input("Enter \"n\" to add gaussian white noise (mean=0, stdev=0.5),
     # dB range is thus 55 - (-30) = 85 
     # so 0% noise should be 55 - (0 * 85)
     # and say 30% noise should be 55 - (0.3 * 85)
-percentage = float(input("Enter a noise percentage. 0 means the audio will have no added noise, 100 means the audio will be entirely noise: "))/100
-snr = 55 - (percentage * 85)
+# percentage = float(input("Enter a noise percentage. 0 means the audio will have no added noise, 100 means the audio will be entirely noise: "))/100
+# snr = 55 - (percentage * 85)
+
+snr = float(input("Enter desired snr: "))
+
 
 # loading audio file
 signal, sample_rate = librosa.load(path, sr=None, mono=True)
