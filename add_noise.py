@@ -17,9 +17,14 @@ import math
 # RAVDESS AVERAGE POWER LEVEL
 RAVDESS_P_AVG = 0.0008270979304005066
 
+
+# rainfall noise downloaded from https://freesound.org/people/Signov/sounds/166741/
+# trimmed at: https://audiotrimmer.com/
 # saving path to rain audio
 rain_noise_file = "./rainfall-trimmed.flac"
 rain_noise_unfiltered, rain_noise_sr = librosa.load(rain_noise_file, sr=None, mono =True)
+
+
 # High-pass filter
 ### CHATGPT ###
 # Define the cutoff frequency for the high-pass filter
