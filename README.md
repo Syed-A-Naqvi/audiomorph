@@ -1,15 +1,15 @@
 # Description
 
-The purpose of this project is to obtain granular control over the amount of noise inserted into a sound file. One can specify the desired sound to noise ratio and the appropriate amount of white noise will be inserted into the sound file. Controlled noise insertion allows for testing the effectos of noise on audio in various settings.
+The purpose of this project is to obtain granular control over the amount of noise inserted into a sound file. If one specifies a desired sound to noise ratio, the appropriate amount of noise will be inserted. Controlled noise insertion allows for testing the effectos of noise on audio in various settings.
 
 # Instructions
 
-- clone repo and run the command ```python3 add_noise.py <audio_file>``` in the terminal from the project root directory
-- replace ```<audio_file>``` with the name of the ravdess audio file to modify
-- provide the desired signal to noise ratio in decibals:
-- - 0 decibals means equal signal to noise
-- - 10 decibals means signal is 10 times as powerful as noise
-- - -10 decibals means noise is 10 times as powerful as signal
+- clone repo and run command ```python3 add_noise.py``` in the terminal from project root directory
+- follow prompts to create the noisy audio and related visualizations
+- the provided file is normalized to the RAVDESS average power level and noise is inserted based on the specified signal to noise ratio
+- check the output folder for original audio, scaled(normalized) audio, noisy audio and all related visualizations
 
-- the provided file is normalized and noise is inserted based on the specified signal to noise ratio
-- check the output folder for original audio, scaled(normalized) audio and finally the noisy audio
+- for signal to noise ratio:
+- - 0 decibels means signal power is the same as nosie power
+- - -10 decibels means noise power is 10 times greater than signal power
+- - 10 decibels means signal power is 10 times greater than noise power
