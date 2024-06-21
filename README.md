@@ -10,6 +10,6 @@ The purpose of this project is to obtain granular control over the amount of noi
 - check the output folder for original audio, scaled(normalized) audio, noisy audio and all related visualizations
 
 - for signal to noise ratio:
-- - 0 decibels means signal power is the same as nosie power
-- - -10 decibels means noise power is 10 times greater than signal power
-- - 10 decibels means signal power is 10 times greater than noise power
+  - 0 decibels means signal power is the same as nosie power
+  - -10 decibels means noise power is 10 times greater than signal power
+  - 10 decibels means signal power is 10 times greater than noise power
