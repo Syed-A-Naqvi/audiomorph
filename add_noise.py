@@ -84,7 +84,7 @@ def add_noise(noise_type, signal, p_or_s, target_avg_power=RAVDESS_P_AVG, percen
     elif noise_type == 'rf':
         noise = np.array(rain_noise_filtered[0:signal_len])
 
-    if(p_or_s == 's'):        
+    if(p_or_s == 'r'):        
         # scaling noise up or down based on desired snr
         snr_scale_factor = np.sqrt( (np.mean(digital_signal**2)/np.mean(noise**2)) * (10**(-snr/10)) )
         noise *= snr_scale_factor
@@ -180,11 +180,11 @@ while(1):
     else:
         print("Please enter a valid plot type.")
 
-print("\nEnter 'p' to add noise as percentage, 's' to add noise using SNR value:")
+print("\nEnter 'p' to add noise as percentage, 'r' to add noise using SNR value:")
 while(1):
     proportion_type = input()
-    if(proportion_type not in set(['s','p'])):
-        print("Please enter either 'p' for percentage or 's' for snr.")
+    if(proportion_type not in set(['p','r'])):
+        print("Please enter either 'p' for percentage or 'r' for snr.")
     else:
         break
 
@@ -225,7 +225,7 @@ sf.write("./output/scaled_audio.wav", audio[0], audio[1])
 if(proportion_type == 'p'):
     noisy_audio = add_noise(noise_type, audio, p_or_s='p', percentage_noise = percentage_noise)
 else:
-    noisy_audio = add_noise(noise_type, audio, p_or_s='s', snr=snr)
+    noisy_audio = add_noise(noise_type, audio, p_or_s='r', snr=snr)
 
 plot_signal(noisy_audio[0], noisy_audio[1], "Noisy Audio ", spect=plot_type)
 sf.write("./output/noisy_audio.wav", noisy_audio[0], noisy_audio[1])
