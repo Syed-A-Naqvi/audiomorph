@@ -195,7 +195,7 @@ while(1):
             else:
                 break
     else:
-        print("\nEnter desired signal-to-noise ratio in db (0dB means equal signal-to-noise):")
+        print("\nEnter desired signal-to-noise ratio in db ([-inf dB, inf dB] where 0 dB is equal signal-to-noise):")
         snr = float(input())
     ############## REQUESTING INFORMATION ##############
 
