@@ -5,6 +5,7 @@ import copy
 import soundfile as sf
 import scipy.signal as signal
 import librosa
+import os
 
 import mpmath as m
 # setting mpmath precision
@@ -38,6 +39,9 @@ rain_noise_filtered = signal.filtfilt(b, a, rain_noise_unfiltered)
 
 # signal plotting function
 def plot_signal(signal, sample_rate, plot_title = "Audio Signal", spect=False, save_path="./output/"):
+    
+    if save_path and not os.path.exists(save_path):
+        os.makedirs(save_path)
     
     if spect == False:
         df = pd.DataFrame({
@@ -150,10 +154,13 @@ path = str(input("Enter path to desired audio file:\n(use custom audio file < 15
 
 while(1):
     
+    # Clearing matplotlib figures
+    plt.close('all')
+    
     # Requesting noise type
     print("\nEnter 'u' for uniform white noise,\n",
-          "     'n' for normally distributed white noise\n",
-          "     'ro' for unfiltered rain noise\n",
+          "     'n' for normally distributed white noise,\n",
+          "     'ro' for unfiltered rain noise,\n",
           "     'rf' for filtered rain noise.")
     while(1):
         noise_type = input()
@@ -164,7 +171,7 @@ while(1):
 
     # Requesting plot type
     print("\nEnter 's' to generate spectrograms,\n",
-          "     't' to generate amplitude timeseries:")
+          "        't' to generate amplitude timeseries:")
     while(1):
         plot_type = input()
 
@@ -177,7 +184,8 @@ while(1):
         else:
             print("Please enter a valid plot type.")
 
-    print("\nEnter 'p' to add noise as percentage, 'r' to add noise using SNR value:")
+    print("\nEnter 'p' to add noise as percentage,\n",
+          "        'r' to add noise using SNR value:")
     while(1):
         proportion_type = input()
         if(proportion_type not in set(['p','r'])):
@@ -187,7 +195,7 @@ while(1):
 
     # percentage of final audio that should be noise
     if(proportion_type == 'p'):
-        print("\nEnter the fraction [0,1] of the average power of the final audio that should be noise:")
+        print("\nEnter the fraction (as a value in [0,1]) of the final audio's average power that should be noise:")
         while(1):
             percentage_noise = float(input())
             if(percentage_noise>1 or percentage_noise<0):
@@ -195,7 +203,7 @@ while(1):
             else:
                 break
     else:
-        print("\nEnter desired signal-to-noise ratio in db ([-inf dB, inf dB] where 0 dB is equal signal-to-noise):")
+        print("\nEnter desired signal-to-noise ratio in db (as a value in [-inf dB, inf dB] where 0 dB is equal signal-to-noise):")
         snr = float(input())
     ############## REQUESTING INFORMATION ##############
 
