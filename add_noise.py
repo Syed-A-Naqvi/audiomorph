@@ -102,8 +102,8 @@ def add_noise(noise_type, signal, p_or_r, percentage_noise = None, snr=0, target
     elif(percentage_noise == 0):
         percentage_signal = 1
         snr = "inf"
-        rav_avg_scale = np.sqrt( (target_avg_power*signal_len) / sum(signal**2))
-        noisy_audio = signal * rav_avg_scale
+        rav_avg_scale = np.sqrt( (target_avg_power*signal_len) / sum(digital_signal**2))
+        noisy_audio = digital_signal * rav_avg_scale
         P_noise = 0
         P_signal = target_avg_power
 
