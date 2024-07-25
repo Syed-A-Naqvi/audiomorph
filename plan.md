@@ -184,5 +184,3 @@ setup(
     python_requires='>=3.6',
 )
 ```
-
-By following this structure, you will create a modular and extensible Python package. Each module can be expanded with more functionality as needed. Ensure you write comprehensive tests and examples to demonstrate how to use your package.

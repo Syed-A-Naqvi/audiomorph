@@ -2,46 +2,60 @@ import librosa
 from typing import List, Union, Optional, Tuple
 import re
 import os
-import glob
-import numpy as np
-
-# the main audio class will create audio objects that will store numpy arrays and sample rates of one or more audio files
-# the user can:
-    # specify the path to one file
-    # specify the path to a folder containing multiple sound files
-    # specify a list of paths to multiple individual files or folders containing files
-        # everything in a folder will be included by default
-        # use a regex string to select specific files in a folder
-
-    # provide a list of files to ignore (none by default)
-    # provide a list of folder paths to ignore (everything ignored by default - overrides include)
-    # use regex to specify particular name patterns to ignore
+import soundfile as sf
 
 class Audio:
     
-    def __init__(self, include: Union[str, Tuple[str, ...]], exclude: Optional[Union[str, Tuple[str, ...]]] = None, recursive: bool = False) -> None:
+    def __init__(self, include: Optional[Union[str, Tuple[str, ...]]] = None, exclude: Optional[Union[str, Tuple[str, ...]]] = None, recursive: Optional[bool] = False) -> None:
         """
-        Create new audio object initidalized with a dictionary of audio_samples loaded using files from specified directories
-        given include and exclude patterns.
+        Creates a new audio object.
+        
+        This function can initialize a new empty object or load specific files based on the include path(s),
+        exclude regex pattern(s), and the recursive directory search flag.
 
-        :param include: A string or tuple of strings specifying the directories or patterns to include.
-        :param exclude: A string or set of strings specifying the patterns to exclude.
-        :param recursive: Boolean indicating whether to search directories recursively.
+        Parameters
+        ----------
+            include (Union[str, Tuple[str, ...]]): Directories or file paths to include.
+            exclude (Optional[Union[str, Tuple[str, ...]]] = None): Patterns for which matching paths are excluded.
+            recursive (bool, optional): Whether to search directories recursively. Defaults to False.            
+        Examples
+        --------
+            load 2 files and search a directory recursively while ignoring filenames containing "file1" or "file3" or "file7":
+            
+            >>> myaudio = Audio(include=["../audiofile1.wav", "../audiofile2.wav", "../audio_directory"],
+                                exclude=[r'.*file[137].*],
+                                recursive=True) 
         """
         
         self.samples = {}
-        self.fetch(include, exclude, recursive)
+        if(include):
+            self.fetch(include, exclude, recursive)
     
-    def fetch(self, include: Union[str, Tuple[str, ...]], exclude: Optional[Union[str, Tuple[str, ...]]] = None, recursive: bool = False, append=False) -> bool:
+    def fetch(self, include: Union[str, Tuple[str, ...]], exclude: Optional[Union[str, Tuple[str, ...]]] = None, recursive: bool = False, append: bool = True) -> bool:
         """
-        Fetch files from specified directories with include and exclude patterns.
+        Loads audio files. This function allows loading specific audio files or directories with optional exclusion patterns and a recursive search option.
+        It can either append files to an existing audio_samples dictionary or overwrite it.
 
-        :param include: A string or tuple of strings specifying the directories or patterns to include.
-        :param exclude: A string or set of strings specifying the patterns to exclude.
-        :param recursive: Boolean indicating whether to search directories recursively.
-        :param append: True for adding new files to the existing audio dictionary, or False to overwrite it.
-        :return: Boolean value True if all files loaded successfully, False otherwise.
+        Parametrs
+        ---------
+            include (Union[str, Tuple[str, ...]]): Directories or file paths to include.
+            exclude (Optional[Union[str, Tuple[str, ...]]] = None): Patterns for which matching paths are excluded.
+            recursive (bool, optional): Whether to search directories recursively. Defaults to False.
+            append (bool, optional): True to add new files to the existing dictionary, False to overwrite. Defaluts to True.
+
+        Returns
+        -------
+            bool: True if all files loaded successfully, False otherwise.
+        
+        Examples
+        --------
+            load 2 files and search a directory recursively while ignoring filenames containing "file1" or "file3" or "file7":
+            
+            >>> myaudio = Audio(include=["../audiofile1.wav", "../audiofile2.wav", "../audio_directory"],
+                                exclude=[r'.*file[137].*],
+                                recursive=True)
         """
+
         if isinstance(include, str):
             include = (include,)
             
@@ -60,7 +74,7 @@ class Audio:
         
         for path in include:
             if(self._is_excluded(path, exclude)):
-                print(f"{path} matched a pattern in the exclude list and was ignored")
+                print(f"{path} matched a pattern in the exclude list and was ignored.")
                 continue
             if os.path.isdir(path):
                 audio_files.extend(self._fetch_from_directory(path, exclude, recursive))
@@ -80,72 +94,109 @@ class Audio:
             else:
                 try:
                     sample, sr = librosa.load(f)
-                    self.samples[f] = [sample, sr]
+                    self.samples[f.split('/')[-1]] = [sample, sr]
                 except Exception as e:
-                    print(f"Error loading {f}: {e}")
+                    print(f"Error loading {f}: {e}.")
                     return False
         
         return True
     
     def _fetch_from_directory(self, directory: str, exclude: Tuple[re.Pattern, ...], recursive: bool) -> List[str]:
         """
-        Fetch files from a directory based on include and exclude patterns.
+        Fetch files from a directory based on include and exclude patterns and recursive search flag.
 
-        :param directory: The directory to search.
-        :param exclude: Set of regex patterns to exclude.
-        :param recursive: Boolean indicating whether to search directories recursively.
-        :return: List of file paths.
+        Parameters
+        ----------
+            directory (str): The directory to search.
+            exclude (Tuple[re.Pattern, ...]): Tuple of regex patterns to exclude.
+            recursive (bool): Boolean indicating whether to search directories recursively.
+
+        Returns
+        -------
+            List[str]: List of files meeting criteria.
         """
         
         directory = directory if directory.endswith('/') else (directory + '/')
         extensions = ["*.wav", "*.mp3", "*.flac", "*.ogg", "*.m4a", "*.aac", "*.wma", "*.aiff", "*.au", "*.amr",]  # Supported audio formats
         
-        paths = []
+        audio_files = []
         
-        if recursive:
-            for root, dirs, files in os.walk(directory):
-                # Exclude directories early
-                dirs[:] = [d for d in dirs if not self._is_excluded(os.path.join(root, d), exclude)]
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    if not self._is_excluded(file_path, exclude) and any(file_path.endswith(ext[1:]) for ext in extensions):
-                        paths.append(file_path)
-        else:
-            for ext in extensions:
-                search_pattern = directory + ext
-                for path in glob.iglob(search_pattern, recursive=False):
-                    if not self._is_excluded(path, exclude):
-                        paths.append(path)
+        iteration = 0
+        for root, dirs, files in os.walk(directory):
+
+            iteration += 1            
+
+            for file in files:
+                file_path = os.path.join(root, file)
+                if not self._is_excluded(file_path, exclude) and any(file_path.endswith(ext[1:]) for ext in extensions):
+                    audio_files.append(file_path)
+
+            if not recursive and iteration > 0:
+                break
+            
+            # Exclude directories early
+            dirs[:] = [d for d in dirs if not self._is_excluded(os.path.join(root, d), exclude)]
                     
-        return paths
+        return audio_files
    
     def _is_excluded(self, file_path: str, exclude: Tuple[re.Pattern, ...]) -> bool:
         """
-        Check if a file path matches any of the exclude patterns.
+        Check if a file path matches any of the excluded regex patterns.
 
-        :param file_path: The file path to check.
-        :param exclude: Set of regex patterns to exclude.
-        :return: Boolean indicating whether the file path is excluded.
+        Parameters
+        ----------
+            file_path (str): The file path to check.
+            exclude (Tuple[re.Pattern, ...]): Tuple of regex patterns to exclude.
+        
+        Returns
+        -------
+            bool: Boolean indicating whether or not the file path is excluded.
         """
         
-        # use regex or regular wildcard expressions for better exclusion matching
         for e in exclude:
             if(e.search(file_path)):
                 return True
         return False
+    
+    def write(self, output_path: str, in_place: Optional[bool] = False) -> bool:
+        """
+        Writes current state of audio samples to a specified directory. Automatically places output in a new "output" folder or overwrites existing files.
+
+        Parameters
+        ----------
+            output_path (str): Path of directory in which to write currently loaded audio files.
+            in_place (bool, optional): True to overwrite existing files, False to place output in new folder. Defaults to False.
+        
+        Returns
+        -------
+            bool: Boolean indicating whether or not all file(s) were written successfully.
+        """
+        
+        if not os.path.isdir(output_path):
+            print(f"{output_path} is either not a directory or doesn't exist.")
+            return False
+        
+        if not in_place:
+            output_path = output_path+"output/" if output_path.endswith('/') else (output_path+'/output/')
+            if not os.path.isdir(output_path):
+                os.mkdir(output_path)
+
+        for file in self.samples.keys():
+            sf.write(os.path.join(output_path,file), self.samples[file][0], self.samples[file][1])
+            
 
     def print(self) -> None:
         """
-        Displays the current state of the samples dictionary. Outputs the audio file path as the key and a list containing details of loaded amplitude
-        numpy array along with the sample rate.
+        Displays the current state of the samples dictionary. Shows file path as key and list containing details of loaded sample array
+        and sample rate as value.
         """
         count = 0
         print("{")
         if len(self.samples.keys()) != 0:
             for key in self.samples.keys():
                 if (count == (len(self.samples.keys())-1) ):
-                    print(f"{key} : [ (len={self.samples[key][0].size}, dtype={self.samples[key][0].dtype}, shape={self.samples[key][0].shape}), sample_rate={self.samples[key][1]} ]")
+                    print(f"{key} : [ (dtype={self.samples[key][0].dtype}, shape=|{self.samples[key][0].shape}), sample_rate={self.samples[key][1]} ]")
                 else:
-                    print(f"{key} : [ (len={self.samples[key][0].size}, dtype={self.samples[key][0].dtype}, shape={self.samples[key][0].shape}), sample_rate={self.samples[key][1]} ],")
+                    print(f"{key} : [ (dtype={self.samples[key][0].dtype}, shape={self.samples[key][0].shape}), sample_rate={self.samples[key][1]} ],")
                 count += 1
         print("}")
